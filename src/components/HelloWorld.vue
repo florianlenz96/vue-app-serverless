@@ -1,15 +1,27 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from "vue";
 
 defineProps({
   msg: String,
-})
+});
 
-const count = ref(0)
+onMounted(async () => {
+  try {
+    const response = await fetch("api/greeting");
+    greeting.value = await response.text();
+  } catch (error) {
+    greeting.value = "Failed to fetch greeting";
+  }
+});
+
+const greeting = ref("");
+const count = ref(0);
 </script>
 
 <template>
   <h1>{{ msg }}</h1>
+
+  <h2>{{ greeting }}</h2>
 
   <div class="card">
     <button type="button" @click="count++">count is {{ count }}</button>

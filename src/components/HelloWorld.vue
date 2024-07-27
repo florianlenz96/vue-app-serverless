@@ -5,15 +5,37 @@ defineProps({
   msg: String,
 });
 
+const createAuthor = async () => {
+  const id = Math.floor(Math.random() * 1000000);
+  const response = await fetch("/data-api/rest/Author", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-MS-API-ROLE": "admin",
+    },
+    body: JSON.stringify({
+      id: id,
+      first_name: "John",
+      middle_name: "M",
+      last_name: "Doe",
+    }),
+  });
+  console.log(response.body);
+  await fetchData();
+};
+
+const fetchData = async () => {
+  const response = await fetch("api/greeting");
+  const authorsResponse = await fetch("/data-api/rest/Author");
+  authors.value = await authorsResponse.json();
+  greeting.value = await response.text();
+};
+
 onMounted(async () => {
-  try {
-    const response = await fetch("api/greeting");
-    greeting.value = await response.text();
-  } catch (error) {
-    greeting.value = "Failed to fetch greeting";
-  }
+  await fetchData();
 });
 
+const authors = ref([]);
 const greeting = ref("");
 const count = ref(0);
 </script>
@@ -22,6 +44,14 @@ const count = ref(0);
   <h1>{{ msg }}</h1>
 
   <h2>{{ greeting }}</h2>
+
+  <button @click="createAuthor">Create Author</button>
+
+  <ul>
+    <li v-for="author in authors.value" :key="author.id">
+      {{ author.first_name }} {{ author.last_name }}
+    </li>
+  </ul>
 
   <div class="card">
     <button type="button" @click="count++">count is {{ count }}</button>
